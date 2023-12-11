@@ -1,193 +1,247 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>App Visualization</title>
-    <script src="https://code.highcharts.com/highcharts.js"></script>
-    <script src="https://code.highcharts.com/highcharts-more.js"></script>
-    <script src="https://code.highcharts.com/modules/exporting.js"></script>
-    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
-    <style>
-        .highcharts-figure, .highcharts-data-table table {
-            min-width: 320px; 
-            max-width: 800px;
-            margin: 1em auto;
-        }
-        .highcharts-data-table table {
-            font-family: Verdana, sans-serif;
-            border-collapse: collapse;
-            border: 1px solid #EBEBEB;
-            margin: 10px auto;
-            text-align: center;
-            width: 100%;
-            max-width: 500px;
-        }
-        .highcharts-data-table caption {
-            padding: 1em 0;
-            font-size: 1.2em;
-            color: #555;
-        }
-        .highcharts-data-table th {
-            font-weight: 600;
-            padding: 0.5em;
-        }
-        .highcharts-data-table td, .highcharts-data-table th, .highcharts-data-table caption {
-            padding: 0.5em;
-        }
-        .highcharts-data-table thead tr, .highcharts-data-table tr:nth-child(even) {
-            background: #f8f8f8;
-        }
-        .highcharts-data-table tr:hover {
-            background: #f1f7ff;
-        }
-    </style>
+	<head>
+    <meta charset="utf-8">
+    <title>ZingSoft Demo</title>
+	<style>
+	  * { 
+	    font-family:'Lucida Sans Unicode','Lucida Grande','Lucida Sans';
+	    font-size:12px;
+	  }
+	</style>
+	
+		<script src="https://cdn.zingchart.com/zingchart.min.js"></script>
 </head>
-<body>
-    <figure class="highcharts-figure">
-        <div id="container"></div>
-        <p class="highcharts-description">
-            Visualization of apps and their upstream applications by country.
-        </p>
-    </figure>
+<style>
+    html, body {
+        height:100%;
+        width:100%;
+        margin:0;
+        padding:0;
+    }
+    #myChart {
+        height:100%;
+        width:100%;
+        min-height:150px;
+    }
+    .zc-ref {
+        display:none;
+    }
+</style>
+	<body>
+	  
+	  <div style="padding:10px">
+Show from level <select id="minlevel">
+    <option value="0" selected>0</option>
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5">5</option>
+</select> to level <select id="maxlevel">
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5" selected>5</option>
+</select>&nbsp;<button class="btn" id="btnrender">Render</button>
+</div>
 
-    <script>
-        // Paste the transformed JSON data here
-        var seriesData = [
-        {
-            "name": "Poland",
-            "data": [
-                {
-                    "name": "8684394",
-                    "value": 1,
-                    "upstream": [
-                        {
-                            "upappid": 10390944,
-                            "upappcountry": "United Kingdom"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "United Kingdom",
-            "data": [
-                {
-                    "name": "877118",
-                    "value": 2,
-                    "upstream": [
-                        {
-                            "upappid": 241857,
-                            "upappcountry": "United Kingdom"
-                        },
-                        {
-                            "upappid": 237479,
-                            "upappcountry": "United Kingdom"
-                        }
-                    ]
-                },
-                {
-                    "name": "10897069",
-                    "value": 2,
-                    "upstream": [
-                        {
-                            "upappid": 237487,
-                            "upappcountry": "United Kingdom"
-                        },
-                        {
-                            "upappid": 1625663,
-                            "upappcountry": "United Kingdom"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "United States of America",
-            "data": [
-                {
-                    "name": "572803",
-                    "value": 3,
-                    "upstream": [
-                        {
-                            "upappid": 242344,
-                            "upappcountry": "United States of America"
-                        },
-                        {
-                            "upappid": 237478,
-                            "upappcountry": "United Kingdom"
-                        },
-                        {
-                            "upappid": 11244915,
-                            "upappcountry": "United Kingdom"
-                        }
-                    ]
-                },
-                {
-                    "name": "10269148",
-                    "value": 2,
-                    "upstream": [
-                        {
-                            "upappid": 242101,
-                            "upappcountry": "United Kingdom"
-                        },
-                        {
-                            "upappid": 10267158,
-                            "upappcountry": "United Kingdom"
-                        }
-                    ]
-                }
-            ]
-        }
-    ]; // Replace with JSON data from Python script
-        Highcharts.chart('container', {
-            chart: {
-                type: 'packedbubble',
-                height: '100%'
+		<div id="zc"></div>
+        <script>
+            zingchart.THEME = 'neo'; // Sets the global theme
+
+            var fsdata = [
+            {
+              "id": "United_States_of_America",
+              "text": "United States of America",
+              "parent": "",
+              "value": 2
             },
-            title: {
-                text: 'Apps and Their Upstream Applications by Country'
+            {
+              "id": "United_States_of_America_10269148",
+              "text": "10269148",
+              "parent": "United_States_of_America",
+              "value": 10
             },
-            tooltip: {
-                useHTML: true,
-                pointFormatter: function() {
-                    var upstreamApps = this.upstream.map(function(upstreamItem) {
-                        return 'App ID: ' + upstreamItem.upappid + ', Country: ' + upstreamItem.upappcountry;
-                    }).join('<br>');
-                    return '<b>' + this.name + ':</b> <br>' + upstreamApps;
-                }
+            {
+              "id": "United_States_of_America_10269148_United_Kingdom",
+              "text": "United Kingdom",
+              "parent": "United_States_of_America_10269148",
+              "value": 20
+            },
+            {
+              "id": "United_States_of_America_10269148_United_Kingdom_242101",
+              "text": "242101",
+              "parent": "United_States_of_America_10269148_United_Kingdom",
+              "value": 10
+            },
+            {
+              "id": "United_States_of_America_10269148_United_Kingdom_10267158",
+              "text": "10267158",
+              "parent": "United_States_of_America_10269148_United_Kingdom",
+              "value": 10
+            },
+            {
+              "id": "United_States_of_America_572803",
+              "text": "572803",
+              "parent": "United_States_of_America",
+              "value": 20
+            },
+            {
+              "id": "United_States_of_America_572803_United_States_of_America",
+              "text": "United States of America",
+              "parent": "United_States_of_America_572803",
+              "value": 10
+            },
+            {
+              "id": "United_States_of_America_572803_United_States_of_America_242344",
+              "text": "242344",
+              "parent": "United_States_of_America_572803_United_States_of_America",
+              "value": 10
+            },
+            {
+              "id": "United_States_of_America_572803_United_Kingdom",
+              "text": "United Kingdom",
+              "parent": "United_States_of_America_572803",
+              "value": 20
+            },
+            {
+              "id": "United_States_of_America_572803_United_Kingdom_237478",
+              "text": "237478",
+              "parent": "United_States_of_America_572803_United_Kingdom",
+              "value": 10
+            },
+            {
+              "id": "United_States_of_America_572803_United_Kingdom_11244915",
+              "text": "11244915",
+              "parent": "United_States_of_America_572803_United_Kingdom",
+              "value": 10
+            },
+            {
+              "id": "Poland",
+              "text": "Poland",
+              "parent": "",
+              "value": 1
+            },
+            {
+              "id": "Poland_8684394",
+              "text": "8684394",
+              "parent": "Poland",
+              "value": 10
+            },
+            {
+              "id": "Poland_8684394_United_Kingdom",
+              "text": "United Kingdom",
+              "parent": "Poland_8684394",
+              "value": 10
+            },
+            {
+              "id": "Poland_8684394_United_Kingdom_10390944",
+              "text": "10390944",
+              "parent": "Poland_8684394_United_Kingdom",
+              "value": 10
+            },
+            {
+              "id": "United_Kingdom",
+              "text": "United Kingdom",
+              "parent": "",
+              "value": 2
+            },
+            {
+              "id": "United_Kingdom_10897069",
+              "text": "10897069",
+              "parent": "United_Kingdom",
+              "value": 10
+            },
+            {
+              "id": "United_Kingdom_10897069_United_Kingdom",
+              "text": "United Kingdom",
+              "parent": "United_Kingdom_10897069",
+              "value": 20
+            },
+            {
+              "id": "United_Kingdom_10897069_United_Kingdom_237487",
+              "text": "237487",
+              "parent": "United_Kingdom_10897069_United_Kingdom",
+              "value": 10
+            },
+            {
+              "id": "United_Kingdom_10897069_United_Kingdom_1625663",
+              "text": "1625663",
+              "parent": "United_Kingdom_10897069_United_Kingdom",
+              "value": 10
+            },
+            {
+              "id": "United_Kingdom_877118",
+              "text": "877118",
+              "parent": "United_Kingdom",
+              "value": 10
+            },
+            {
+              "id": "United_Kingdom_877118_United_Kingdom",
+              "text": "United Kingdom",
+              "parent": "United_Kingdom_877118",
+              "value": 20
+            },
+            {
+              "id": "United_Kingdom_877118_United_Kingdom_241857",
+              "text": "241857",
+              "parent": "United_Kingdom_877118_United_Kingdom",
+              "value": 10
+            },
+            {
+              "id": "United_Kingdom_877118_United_Kingdom_237479",
+              "text": "237479",
+              "parent": "United_Kingdom_877118_United_Kingdom",
+              "value": 10
             }
-            
-            ,
-            plotOptions: {
-                packedbubble: {
-                    minSize: '20%',
-                    maxSize: '100%',
-                    zMin: 0,
-                    zMax: 1000,
-                    layoutAlgorithm: {
-                        gravitationalConstant: 0.05,
-                        splitSeries: true,
-                        seriesInteraction: false,
-                        dragBetweenSeries: true,
-                        parentNodeLimit: true
-                    },
-                    dataLabels: {
-                        enabled: true,
-                        format: '{point.name}',
-                        filter: {
-                            property: 'y',
-                            operator: '>',
-                            value: 250
-                        },
-                        style: {
-                            color: 'black',
-                            textOutline: 'none',
-                            fontWeight: 'normal'
-                        }
-                    }
+          ];
+
+        function render() {
+            var cdata = {
+              "background-color": "#eee #ddd",
+              "type": "bubble-pack",
+              "plotarea": {
+                "margin": 5
+              },
+              "options": {
+                "active": true,
+                "padding": 1,
+                "min-size": 1,
+                "max-items": 1000,
+                "min-level": minlevel.value,
+                "max-level": maxlevel.value,
+              },
+              "gui": {
+                "contextMenu": {
+                  "button": {
+                    "visible": false
+                  }
                 }
-            },
-            series: seriesData
-        });
-    </script>
-</body>
+              },
+              "theme": "neo",
+              "series": fsdata,
+              "animate": {
+                "effect": "ANIMATION_EXPAND_VERTICAL",
+                "sequence": 1,
+                "speed": 1000
+              }
+            };
+          
+            zingchart.render({
+              id: 'zc',
+              width: 900,
+              height: 900,
+              output: 'svg',
+              data: cdata
+            });
+          };
+          
+
+render();
+
+btnrender.addEventListener('click', render);
+        </script>
+	</body>
 </html>
